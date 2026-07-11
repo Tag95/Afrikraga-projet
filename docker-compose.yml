@@ -1,0 +1,82 @@
+name: afrikraga-demo
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: demo-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: afrikraga_demo
+      MYSQL_USER: demo_user
+      MYSQL_PASSWORD: demo_password
+      MYSQL_ROOT_PASSWORD: demo_root_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pdemo_root_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - afrikraga-demo-net
+
+  redis:
+    image: redis:7
+    container_name: demo-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - afrikraga-demo-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.backend
+    container_name: demo-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - afrikraga-demo-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../Dockerfile.frontend
+    container_name: demo-frontend
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - afrikraga-demo-net
+
+volumes:
+  mysql_data:
+
+networks:
+  afrikraga-demo-net:
+    driver: bridge
