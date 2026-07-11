@@ -3,6 +3,10 @@
 # — piège déjà rencontré en Phase 1, voir section 5 du résumé de continuité.
 FROM php:8.3-cli
 
+# Force apt à utiliser HTTPS (443) plutôt que HTTP (80) — certains
+# firewalls/antivirus Windows bloquent le port 80 sortant alors que le 443 passe.
+RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' /etc/apt/sources.list.d/debian.sources 2>/dev/null || sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' /etc/apt/sources.list 2>/dev/null || true
+
 RUN apt-get update && apt-get install -y \
     unzip \
     git \
