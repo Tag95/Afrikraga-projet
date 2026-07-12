@@ -1,5 +1,4 @@
-name: afrikraga-demo
-
+﻿name: afrikraga-demo
 services:
   mysql:
     image: mysql:8.0
@@ -21,7 +20,6 @@ services:
       retries: 10
     networks:
       - afrikraga-demo-net
-
   redis:
     image: redis:7
     container_name: demo-redis
@@ -35,7 +33,6 @@ services:
       retries: 10
     networks:
       - afrikraga-demo-net
-
   backend:
     build:
       context: ./backend
@@ -55,7 +52,6 @@ services:
         condition: service_healthy
     networks:
       - afrikraga-demo-net
-
   frontend:
     build:
       context: ./frontend
@@ -73,10 +69,8 @@ services:
       - backend
     networks:
       - afrikraga-demo-net
-
 volumes:
   mysql_data:
-
 networks:
   afrikraga-demo-net:
     driver: bridge

@@ -1,20 +1,36 @@
-# Backend - Laravel (dev)
-# Basé sur php:8.3-cli plutôt que composer:latest (PHP trop récent, unzip/git absents)
-# — piège déjà rencontré en Phase 1, voir section 5 du résumé de continuité.
+﻿# Backend - Laravel (dev)
+# Base sur php:8.3-cli plutot que composer:latest (PHP trop recent, unzip/git absents)
+# -- piege deja rencontre en Phase 1, voir section 5 du resume de continuite.
 FROM php:8.3-cli
 
-# Force apt à utiliser HTTPS (443) plutôt que HTTP (80) — certains
+# Force apt a utiliser HTTPS (443) plutot que HTTP (80) -- certains
 # firewalls/antivirus Windows bloquent le port 80 sortant alors que le 443 passe.
 RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' /etc/apt/sources.list.d/debian.sources 2>/dev/null || sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' /etc/apt/sources.list 2>/dev/null || true
 
-RUN apt-get update && apt-get install -y \
+# Versions non pinnees volontairement : les depots Debian standards ne
+# conservent pas les anciennes versions, un pin casserait le build a la
+# prochaine publication de paquet. Risque accepte pour app de demo/dev,
+# a revoir si ce Dockerfile est un jour utilise en production.
+#
+# unzip/git : necessaires a l'execution (composer install relance a chaque
+# demarrage, backend/ monte en volume).
+# libzip-dev/libpng-dev/libonig-dev : uniquement necessaires pour compiler
+# les extensions PHP, purges juste apres. ATTENTION : leur suppression via
+# --auto-remove retire aussi les bibliotheques runtime libzip5/libpng16 dont
+# les extensions gd/zip ont besoin pour FONCTIONNER (pas juste compiler) ;
+# on les reinstalle explicitement en derniere etape, sans leurs headers -dev.
+# default-mysql-client retire : Laravel utilise PDO (pdo_mysql), pas le
+# client mysql en ligne de commande.
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     git \
     libzip-dev \
     libpng-dev \
     libonig-dev \
-    default-mysql-client \
     && docker-php-ext-install pdo_mysql mbstring zip gd \
+    && apt-get purge -y --auto-remove libzip-dev libpng-dev libonig-dev \
+    && apt-get install -y --no-install-recommends libzip5 libpng16-16t64 \
     && rm -rf /var/lib/apt/lists/*
 
 # Installation manuelle de Composer

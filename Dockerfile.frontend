@@ -1,5 +1,9 @@
-# Frontend - React 19 + Vite (dev)
+﻿# Frontend - React 19 + Vite (dev)
 FROM node:20-alpine
+
+# Mise a jour des paquets systeme Alpine (notamment openssl) pour corriger
+# les CVE HIGH detectees par Trivy sur l'image de base (libcrypto3/libssl3).
+RUN apk update && apk upgrade --no-cache
 
 WORKDIR /app
 
