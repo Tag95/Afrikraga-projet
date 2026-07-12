@@ -1,90 +1,73 @@
 ﻿name: CI - DevSecOps Pipeline
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
-
 jobs:
   checkout-test:
-    name: Checkout (test)
+    name: Checkout
     runs-on: ubuntu-latest
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
-
       - name: Vérification
         run: echo "Checkout réussi, pipeline opérationnel."
-
   gitleaks:
-    name: Secret scanning (Gitleaks)
+    name: Gitleaks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Lancer Gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   sca-backend:
-    name: SCA - composer audit (backend)
+    name: Composer Audit
     runs-on: ubuntu-latest
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
-
       - name: Installer PHP + Composer
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-
       - name: Installer les dépendances
         working-directory: backend
         run: composer install --no-interaction --no-progress
-
       - name: Lancer composer audit
         working-directory: backend
         run: composer audit
-
   sca-frontend:
-    name: SCA - npm audit (frontend)
+    name: Npm Audit
     runs-on: ubuntu-latest
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
-
       - name: Installer Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
       - name: Installer les dépendances
         working-directory: frontend
         run: npm install
-
       - name: Lancer npm audit
         working-directory: frontend
         run: npm audit --audit-level=high
-
   container-scan:
-    name: Build + Scan Trivy (gate CRITICAL)
+    name: Trivy Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
-
       - name: Build image backend
         run: docker build -t afrikraga-demo-backend -f Dockerfile.backend backend
-
       - name: Build image frontend
         run: docker build -t afrikraga-demo-frontend -f Dockerfile.frontend frontend
-
       - name: Scan Trivy - backend (gate CRITICAL)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -92,7 +75,6 @@ jobs:
           severity: CRITICAL
           exit-code: '1'
           trivyignores: .trivyignore
-
       - name: Scan Trivy - frontend (gate CRITICAL)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
