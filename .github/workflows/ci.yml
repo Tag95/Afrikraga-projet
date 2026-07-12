@@ -86,7 +86,7 @@ jobs:
         run: docker build -t afrikraga-demo-frontend -f Dockerfile.frontend frontend
 
       - name: Scan Trivy - backend (gate CRITICAL)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: afrikraga-demo-backend
           severity: CRITICAL
@@ -94,7 +94,7 @@ jobs:
           trivyignores: .trivyignore
 
       - name: Scan Trivy - frontend (gate CRITICAL)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: afrikraga-demo-frontend
           severity: CRITICAL
