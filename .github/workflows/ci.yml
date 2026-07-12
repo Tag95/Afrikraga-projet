@@ -71,3 +71,32 @@ jobs:
       - name: Lancer npm audit
         working-directory: frontend
         run: npm audit --audit-level=high
+
+  container-scan:
+    name: Build + Scan Trivy (gate CRITICAL)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Build image backend
+        run: docker build -t afrikraga-demo-backend -f Dockerfile.backend backend
+
+      - name: Build image frontend
+        run: docker build -t afrikraga-demo-frontend -f Dockerfile.frontend frontend
+
+      - name: Scan Trivy - backend (gate CRITICAL)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: afrikraga-demo-backend
+          severity: CRITICAL
+          exit-code: '1'
+          trivyignores: .trivyignore
+
+      - name: Scan Trivy - frontend (gate CRITICAL)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: afrikraga-demo-frontend
+          severity: CRITICAL
+          exit-code: '1'
+          trivyignores: .trivyignore

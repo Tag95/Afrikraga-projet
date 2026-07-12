@@ -1,0 +1,10 @@
+﻿# CVE acceptes et documentes dans FINDINGS.md (F-022) - risque residuel non exploitable
+# dans le contexte du conteneur, ne pas re-signaler tant que non revalides manuellement.
+
+# perl / libperl5.40 / perl-base / perl-modules-5.40 : dependance transitive de git,
+# jamais utilisee par l'application (pas de script Perl execute par Laravel).
+CVE-2026-42496
+
+# linux-libc-dev : headers noyau inclus par defaut dans php:8.3-cli, jamais utilises
+# a l'execution (pas de compilation noyau dans le conteneur).
+CVE-2026-43185
