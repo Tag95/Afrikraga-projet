@@ -1,0 +1,19 @@
+﻿name: CI - DevSecOps Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  checkout-test:
+    name: Checkout (test)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Vérification
+        run: echo "Checkout réussi, pipeline opérationnel."
