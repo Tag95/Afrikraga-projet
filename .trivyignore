@@ -8,3 +8,10 @@ CVE-2026-42496
 # linux-libc-dev : headers noyau inclus par defaut dans php:8.3-cli, jamais utilises
 # a l'execution (pas de compilation noyau dans le conteneur).
 CVE-2026-43185
+
+# perl / libperl5.40 (nouveau CVE detecte le 12/07/2026) : heap buffer overflow dans
+# le compilateur regex Perl, requiert un build 32-bit ET l'execution de code Perl
+# avec une regex attaquant-controlee. Notre image est en 64-bit (amd64/x86_64,
+# Debian trixie standard) ET Perl n'est jamais execute par l'application (meme
+# raison que CVE-2026-42496 ci-dessus). Double condition non remplie.
+CVE-2026-8376
