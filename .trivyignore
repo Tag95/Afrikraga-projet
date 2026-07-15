@@ -12,3 +12,33 @@ CVE-2026-43185
 # Debian trixie standard) ET Perl n'est jamais execute par l'application (meme
 # raison que CVE-2026-42496 ci-dessus). Double condition non remplie.
 CVE-2026-8376
+
+# --- Ajouts du 15/07/2026, suite a l'epinglage de l'image sur bookworm ---
+# (Dockerfile.backend corrige : php:8.3-cli-bookworm au lieu de php:8.3-cli
+# flottant, qui derivait vers trixie -- les CVE trixie ci-dessus restent en
+# securite si un futur rebuild derive a nouveau, mais ne s'appliquent plus
+# directement sur l'image actuelle en bookworm/Perl 5.36)
+
+# CVE-2026-13221 (libperl5.36/perl/perl-base/perl-modules-5.36) : meme famille
+# que CVE-2026-8376 ci-dessus (bug regex Perl), meme justification -- Perl
+# jamais execute par l'application.
+CVE-2026-13221
+
+# CVE-2025-7458 (libsqlite3-0) : dependance transitive, l'application utilise
+# MySQL exclusivement (PDO pdo_mysql), SQLite jamais sollicite a l'execution.
+CVE-2025-7458
+
+# CVE-2023-45853 (zlib1g) : statut Trivy "will_not_fix" (fournisseur), concerne
+# zipOpenNewFileInZip4_6, fonction d'ecriture ZIP non utilisee par l'application
+# (Laravel n'ecrit pas de ZIP via zlib directement).
+CVE-2023-45853
+
+# CVE-2026-6653 (libxml2) : ATTENTION, PAS LA MEME SITUATION QUE CI-DESSUS.
+# libxml2 est une dependance REELLE (requise par cloudinary/cloudinary_php,
+# SDK utilise en production pour l'upload d'images). Statut Trivy:
+# fix_deferred -- aucun correctif Debian bookworm disponible a ce jour
+# (verifie le 15/07/2026). Risque ACCEPTE TEMPORAIREMENT faute d'alternative
+# technique immediate (pas de version corrigee a installer). A REEVALUER
+# reguliverement : verifier via `apt list --upgradable` si un correctif
+# Debian est publie, et retirer cette ligne des que possible.
+CVE-2026-6653
