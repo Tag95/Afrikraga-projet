@@ -125,12 +125,10 @@ jobs:
     if: github.event_name == 'push'
     runs-on: self-hosted
     steps:
-      - name: Set lowercase owner
-        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
       - name: Deploy backend image
-        run: kubectl set image deployment/backend backend=ghcr.io/${{ env.OWNER_LC }}/afrikraga-backend:${{ github.sha }} -n afrikraga-demo
+        run: kubectl set image deployment/backend backend=ghcr.io/tag95/afrikraga-backend:${{ github.sha }} -n afrikraga-demo
       - name: Deploy frontend image
-        run: kubectl set image deployment/frontend frontend=ghcr.io/${{ env.OWNER_LC }}/afrikraga-frontend:${{ github.sha }} -n afrikraga-demo
+        run: kubectl set image deployment/frontend frontend=ghcr.io/tag95/afrikraga-frontend:${{ github.sha }} -n afrikraga-demo
       - name: Verify rollout - backend
         run: kubectl rollout status deployment/backend -n afrikraga-demo --timeout=120s
       - name: Verify rollout - frontend
