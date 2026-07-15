@@ -5,11 +5,9 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-
 permissions:
   contents: read
   packages: write
-
 jobs:
   checkout-test:
     name: Checkout
@@ -17,7 +15,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Vérification
+      - name: Verification
         run: echo "OK"
   gitleaks:
     name: Gitleaks
@@ -87,7 +85,6 @@ jobs:
           severity: CRITICAL
           exit-code: '1'
           trivyignores: .trivyignore
-
   ghcr-publish:
     name: GHCR Publish
     needs: container-scan
@@ -96,29 +93,45 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set lowercase owner
         run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
-
       - name: Login GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build & Push Backend
         uses: docker/build-push-action@v6
         with:
           context: backend
           file: Dockerfile.backend
           push: true
-          tags: ghcr.io/${{ env.OWNER_LC }}/afrikraga-backend:latest
-
+          tags: |
+            ghcr.io/${{ env.OWNER_LC }}/afrikraga-backend:latest
+            ghcr.io/${{ env.OWNER_LC }}/afrikraga-backend:${{ github.sha }}
       - name: Build & Push Frontend
         uses: docker/build-push-action@v6
         with:
           context: frontend
           file: Dockerfile.frontend
           push: true
-          tags: ghcr.io/${{ env.OWNER_LC }}/afrikraga-frontend:latest
+          tags: |
+            ghcr.io/${{ env.OWNER_LC }}/afrikraga-frontend:latest
+            ghcr.io/${{ env.OWNER_LC }}/afrikraga-frontend:${{ github.sha }}
+  deploy:
+    name: Deploy to k3d
+    needs: ghcr-publish
+    if: github.event_name == 'push'
+    runs-on: self-hosted
+    steps:
+      - name: Set lowercase owner
+        run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
+      - name: Deploy backend image
+        run: kubectl set image deployment/backend backend=ghcr.io/${{ env.OWNER_LC }}/afrikraga-backend:${{ github.sha }} -n afrikraga-demo
+      - name: Deploy frontend image
+        run: kubectl set image deployment/frontend frontend=ghcr.io/${{ env.OWNER_LC }}/afrikraga-frontend:${{ github.sha }} -n afrikraga-demo
+      - name: Verify rollout - backend
+        run: kubectl rollout status deployment/backend -n afrikraga-demo --timeout=120s
+      - name: Verify rollout - frontend
+        run: kubectl rollout status deployment/frontend -n afrikraga-demo --timeout=120s
