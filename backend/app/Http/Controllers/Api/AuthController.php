@@ -95,7 +95,7 @@ class AuthController extends Controller
     {
         // Debug: Log des données reçues
         \Log::info('Login attempt', [
-            'all_data' => $request->all(),
+            'all_data' => \Illuminate\Support\Arr::except($request->all(), ['password']),
             'email' => $request->email,
             'whatsapp_phone' => $request->whatsapp_phone,
             'password' => $request->password ? '***' : 'null',

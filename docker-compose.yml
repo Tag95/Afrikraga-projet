@@ -3,6 +3,7 @@ services:
   mysql:
     image: mysql:8.0
     container_name: demo-mysql
+    init: true
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: afrikraga_demo
