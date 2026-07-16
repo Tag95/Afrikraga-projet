@@ -1,0 +1,101 @@
+﻿# Network Policies — segmentation du trafic namespace afrikraga-demo
+# F-022 : aucune Network Policy n'existait, tout pod pouvait parler à tout pod.
+
+---
+# 1) Deny-all par défaut : bloque tout trafic entrant non explicitement autorisé
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: afrikraga-demo
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+
+---
+# 2) Frontend : accessible depuis l'exterieur (demo), aucune restriction d'origine
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-ingress
+  namespace: afrikraga-demo
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 4173
+
+---
+# 3) Backend : accessible depuis le frontend et depuis l'exterieur
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backend-ingress
+  namespace: afrikraga-demo
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend
+      ports:
+        - protocol: TCP
+          port: 8000
+    - ports:
+        - protocol: TCP
+          port: 8000
+
+---
+# 4) MySQL : accessible UNIQUEMENT depuis le backend
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mysql-ingress
+  namespace: afrikraga-demo
+spec:
+  podSelector:
+    matchLabels:
+      app: mysql
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: backend
+      ports:
+        - protocol: TCP
+          port: 3306
+
+---
+# 5) Redis : accessible UNIQUEMENT depuis le backend
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-redis-ingress
+  namespace: afrikraga-demo
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: backend
+      ports:
+        - protocol: TCP
+          port: 6379
