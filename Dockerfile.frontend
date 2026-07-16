@@ -5,5 +5,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+RUN chown -R node:node /app
+USER node
 EXPOSE 5173 4173
 CMD ["sh", "-c", "npm install && npm run dev -- --host 0.0.0.0"]
