@@ -130,6 +130,6 @@ jobs:
       - name: Deploy frontend image
         run: kubectl set image deployment/frontend frontend=ghcr.io/tag95/afrikraga-frontend:${{ github.sha }} -n afrikraga-demo
       - name: Verify rollout - backend
-        run: kubectl rollout status deployment/backend -n afrikraga-demo --timeout=120s
+        run: kubectl rollout status deployment/backend -n afrikraga-demo --timeout=600s
       - name: Verify rollout - frontend
-        run: kubectl rollout status deployment/frontend -n afrikraga-demo --timeout=120s
+        run: kubectl rollout status deployment/frontend -n afrikraga-demo --timeout=600s
